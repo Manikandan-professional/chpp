@@ -1,218 +1,136 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 1,
-   "id": "154e12f5",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      " * Serving Flask app '__main__' (lazy loading)\n",
-      " * Environment: production\n",
-      "\u001b[31m   WARNING: This is a development server. Do not use it in a production deployment.\u001b[0m\n",
-      "\u001b[2m   Use a production WSGI server instead.\u001b[0m\n",
-      " * Debug mode: on\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      " * Restarting with stat\n"
-     ]
-    },
-    {
-     "ename": "SystemExit",
-     "evalue": "1",
-     "output_type": "error",
-     "traceback": [
-      "An exception has occurred, use %tb to see the full traceback.\n",
-      "\u001b[1;31mSystemExit\u001b[0m\u001b[1;31m:\u001b[0m 1\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "E:\\Anaconda\\envs\\chpp\\lib\\site-packages\\IPython\\core\\interactiveshell.py:3465: UserWarning: To exit: use 'exit', 'quit', or Ctrl-D.\n",
-      "  warn(\"To exit: use 'exit', 'quit', or Ctrl-D.\", stacklevel=1)\n"
-     ]
-    }
-   ],
-   "source": [
-    "#!/usr/bin/env python\n",
-    "# coding: utf-8\n",
-    "\n",
-    "# In[18]:\n",
-    "\n",
-    "\n",
-    "from flask import Flask, render_template, request\n",
-    "import jsonify\n",
-    "import requests\n",
-    "import pickle\n",
-    "import numpy as np\n",
-    "import sklearn\n",
-    "from sklearn.preprocessing import StandardScaler\n",
-    "app = Flask(__name__)\n",
-    "model = pickle.load(open('xgboost.pkl', 'rb'))\n",
-    "@app.route('/',methods=['GET'])\n",
-    "def Home():\n",
-    "    return render_template('index.html')\n",
-    "\n",
-    "standard_to = StandardScaler()\n",
-    "@app.route(\"/predict\", methods=['POST'])\n",
-    "def predict():\n",
-    "    \n",
-    "    if request.method == 'POST':\n",
-    "        \n",
-    "        Area=request.form['Area']\n",
-    "        INT_SQFT = int(request.form['INT_SQFT'])\n",
-    "        DIST_MAINROAD = int(request.form['DIST_MAINROAD'])\n",
-    "        N_BEDROOM = int(request.form['DIST_MAINROAD'])\n",
-    "        N_BATHROOM = int(request.form['N_BATHROOM'])\n",
-    "        N_ROOM = int(request.form['N_ROOM'])\n",
-    "        SALE_COND = request.form['SALE_COND']\n",
-    "        PARK_FACIL = request.form['PARK_FACIL']\n",
-    "        BUILDTYPE = request.form['BUILDTYPE']\n",
-    "        STREET = request.form['STREET']\n",
-    "        \n",
-    "        if SALE_COND=='abnormal':\n",
-    "            SALE_COND=0\n",
-    "        elif SALE_COND=='family':\n",
-    "            SALE_COND=2\n",
-    "        elif SALE_COND=='partial':\n",
-    "            SALE_COND=4\n",
-    "        elif SALE_COND=='adjLand':\n",
-    "            SALE_COND=1\n",
-    "        elif SALE_COND=='normal sale':\n",
-    "            SALE_COND=3\n",
-    "            \n",
-    "        if PARK_FACIL =='yes':\n",
-    "            PARK_FACIL=1\n",
-    "        elif PARK_FACIL =='no':\n",
-    "            PARK_FACIL=0\n",
-    "            \n",
-    "        if BUILDTYPE =='house':\n",
-    "            BUILDTYPE =1\n",
-    "        elif BUILDTYPE =='others':\n",
-    "            BUILDTYPE =2\n",
-    "        elif BUILDTYPE =='commercial':\n",
-    "            BUILDTYPE =0\n",
-    "            \n",
-    "        if STREET =='paved':\n",
-    "            STREET =2\n",
-    "        elif STREET =='gravel':\n",
-    "            STREET =0\n",
-    "        elif STREET =='no access':\n",
-    "            STREET =1\n",
-    "            \n",
-    "        if Area=='tnagar':\n",
-    "            Area=0\n",
-    "    \n",
-    "            MZZONE = 4.03\n",
-    "            QS_ROOMS = 3.54\n",
-    "            QS_BATHROOM = 3.50\n",
-    "            QS_BEDROOM = 3.52\n",
-    "            QS_OVERALL = 3.52\n",
-    "            Year_difference = 25.15\n",
-    "        elif Area=='anna nagar':\n",
-    "            Area=1\n",
-    "        \n",
-    "            MZZONE = 4.03\n",
-    "            QS_ROOMS = 3.54\n",
-    "            QS_BATHROOM = 3.47\n",
-    "            QS_BEDROOM = 3.47\n",
-    "            QS_OVERALL = 3.49\n",
-    "            Year_difference = 25.24\n",
-    "        elif Area=='adyar':\n",
-    "            Area=2\n",
-    "            \n",
-    "            MZZONE = 2.38\n",
-    "            QS_ROOMS = 3.50\n",
-    "            QS_BATHROOM = 3.50\n",
-    "            QS_BEDROOM = 3.49\n",
-    "            QS_OVERALL = 3.49\n",
-    "            Year_difference = 22.67\n",
-    "        elif Area=='kk nagar':\n",
-    "            Area=3\n",
-    "       \n",
-    "            MZZONE = 4.01\n",
-    "            QS_ROOMS = 3.55\n",
-    "            QS_BATHROOM = 3.52\n",
-    "            QS_BEDROOM = 3.51\n",
-    "            QS_OVERALL = 3.52\n",
-    "            Year_difference = 17.31\n",
-    "        elif Area=='velachery':\n",
-    "            Area=4\n",
-    "          \n",
-    "            MZZONE = 2.48\n",
-    "            QS_ROOMS = 3.52\n",
-    "            QS_BATHROOM = 3.50\n",
-    "            QS_BEDROOM = 3.46\n",
-    "            QS_OVERALL = 3.50\n",
-    "            Year_difference = 30.31\n",
-    "        elif Area=='karapakkam':\n",
-    "            Area=5\n",
-    "           \n",
-    "            MZZONE = 2.42\n",
-    "            QS_ROOMS = 3.49\n",
-    "            QS_BATHROOM = 3.48\n",
-    "            QS_BEDROOM = 3.49\n",
-    "            QS_OVERALL = 3.49\n",
-    "            Year_difference = 27.74\n",
-    "        elif Area=='chrompet':\n",
-    "            Area=6\n",
-    "           \n",
-    "            MZZONE = 4.03\n",
-    "            QS_ROOMS = 3.54\n",
-    "            QS_BATHROOM = 3.50\n",
-    "            QS_BEDROOM = 3.52\n",
-    "            QS_OVERALL = 3.52\n",
-    "            Year_difference = 25.15\n",
-    "        \n",
-    "        prediction=model.predict([[Area,INT_SQFT,DIST_MAINROAD,N_BEDROOM,N_BATHROOM,N_ROOM,SALE_COND,PARK_FACIL,BUILDTYPE,STREET,MZZONE,QS_ROOMS,QS_BATHROOM,QS_BEDROOM,QS_OVERALL,Year_difference]])\n",
-    "        output=round(prediction[0],2)\n",
-    "        if output<0:\n",
-    "            return render_template('index.html',prediction_texts=\"Invalid Input\")\n",
-    "        else:\n",
-    "            return render_template('index.html',prediction_text=\"You Can Sell The House at {}\".format(output))\n",
-    "            \n",
-    "    else:\n",
-    "        return render_template('index.html')\n",
-    "if __name__==\"__main__\":\n",
-    "  \n",
-    "    app.run(debug=True)\n",
-    "\n",
-    "\n",
-    "\n",
-    "\n",
-    "\n",
-    "\n"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.7.11"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+from flask import Flask, render_template, request
+import jsonify
+import requests
+import pickle
+import numpy as np
+import sklearn
+from sklearn.preprocessing import StandardScaler
+app = Flask(__name__)
+model = pickle.load(open('xgboost.pkl', 'rb'))
+@app.route('/',methods=['GET'])
+def Home():
+    return render_template('index.html')
+
+standard_to = StandardScaler()
+@app.route("/predict", methods=['POST'])
+def predict():
+    
+    if request.method == 'POST':
+        
+        Area=request.form['Area']
+        INT_SQFT = int(request.form['INT_SQFT'])
+        DIST_MAINROAD = int(request.form['DIST_MAINROAD'])
+        N_BEDROOM = int(request.form['DIST_MAINROAD'])
+        N_BATHROOM = int(request.form['N_BATHROOM'])
+        N_ROOM = int(request.form['N_ROOM'])
+        SALE_COND = request.form['SALE_COND']
+        PARK_FACIL = request.form['PARK_FACIL']
+        BUILDTYPE = request.form['BUILDTYPE']
+        STREET = request.form['STREET']
+        
+        if SALE_COND=='abnormal':
+            SALE_COND=0
+        elif SALE_COND=='family':
+            SALE_COND=2
+        elif SALE_COND=='partial':
+            SALE_COND=4
+        elif SALE_COND=='adjLand':
+            SALE_COND=1
+        elif SALE_COND=='normal sale':
+            SALE_COND=3
+            
+        if PARK_FACIL =='yes':
+            PARK_FACIL=1
+        elif PARK_FACIL =='no':
+            PARK_FACIL=0
+            
+        if BUILDTYPE =='house':
+            BUILDTYPE =1
+        elif BUILDTYPE =='others':
+            BUILDTYPE =2
+        elif BUILDTYPE =='commercial':
+            BUILDTYPE =0
+            
+        if STREET =='paved':
+            STREET =2
+        elif STREET =='gravel':
+            STREET =0
+        elif STREET =='no access':
+            STREET =1
+            
+        if Area=='tnagar':
+            Area=0
+    
+            MZZONE = 4.03
+            QS_ROOMS = 3.54
+            QS_BATHROOM = 3.50
+            QS_BEDROOM = 3.52
+            QS_OVERALL = 3.52
+            Year_difference = 25.15
+        elif Area=='anna nagar':
+            Area=1
+        
+            MZZONE = 4.03
+            QS_ROOMS = 3.54
+            QS_BATHROOM = 3.47
+            QS_BEDROOM = 3.47
+            QS_OVERALL = 3.49
+            Year_difference = 25.24
+        elif Area=='adyar':
+            Area=2
+            
+            MZZONE = 2.38
+            QS_ROOMS = 3.50
+            QS_BATHROOM = 3.50
+            QS_BEDROOM = 3.49
+            QS_OVERALL = 3.49
+            Year_difference = 22.67
+        elif Area=='kk nagar':
+            Area=3
+       
+            MZZONE = 4.01
+            QS_ROOMS = 3.55
+            QS_BATHROOM = 3.52
+            QS_BEDROOM = 3.51
+            QS_OVERALL = 3.52
+            Year_difference = 17.31
+        elif Area=='velachery':
+            Area=4
+          
+            MZZONE = 2.48
+            QS_ROOMS = 3.52
+            QS_BATHROOM = 3.50
+            QS_BEDROOM = 3.46
+            QS_OVERALL = 3.50
+            Year_difference = 30.31
+        elif Area=='karapakkam':
+            Area=5
+           
+            MZZONE = 2.42
+            QS_ROOMS = 3.49
+            QS_BATHROOM = 3.48
+            QS_BEDROOM = 3.49
+            QS_OVERALL = 3.49
+            Year_difference = 27.74
+        elif Area=='chrompet':
+            Area=6
+           
+            MZZONE = 4.03
+            QS_ROOMS = 3.54
+            QS_BATHROOM = 3.50
+            QS_BEDROOM = 3.52
+            QS_OVERALL = 3.52
+            Year_difference = 25.15
+        
+        prediction=model.predict([[Area,INT_SQFT,DIST_MAINROAD,N_BEDROOM,N_BATHROOM,N_ROOM,SALE_COND,PARK_FACIL,BUILDTYPE,STREET,MZZONE,QS_ROOMS,QS_BATHROOM,QS_BEDROOM,QS_OVERALL,Year_difference]])
+        output=round(prediction[0],2)
+        if output<0:
+            return render_template('index.html',prediction_texts="Invalid Input")
+        else:
+            return render_template('index.html',prediction_text="You Can Sell The House at {}".format(output))
+            
+    else:
+        return render_template('index.html')
+if __name__=="__main__":
+  
+    app.run(debug=True)
